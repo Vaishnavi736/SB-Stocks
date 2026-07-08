@@ -2,23 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import { 
-  Search, 
-  Star, 
-  TrendingUp, 
-  TrendingDown, 
-  ArrowUpRight, 
-  Activity, 
-  Plus, 
-  Check, 
-  DollarSign,
+import {
+  Search,
+  Star,
+  TrendingUp,
+  TrendingDown,
+  ArrowUpRight,
+  Activity,
+  Flame,
   ChevronLeft,
-  ChevronRight,
-  Sparkles
+  ChevronRight
 } from 'lucide-react';
+import { motion } from 'framer-motion';
 import DashboardLayout from '../layout/DashboardLayout';
 import GlassCard from '../components/GlassCard';
 import LoadingSkeleton from '../components/LoadingSkeleton';
+import TabSwitch from '../components/TabSwitch';
 
 const Market = () => {
   const [stocks, setStocks] = useState([]);
@@ -154,38 +153,26 @@ const Market = () => {
     <DashboardLayout>
       <div className="space-y-8">
         {/* Title */}
-        <div>
-          <h1 className="text-3xl font-extrabold text-slate-100 font-display">Markets</h1>
-          <p className="text-xs text-slate-400 mt-1">Search, bookmark, and trade US Stocks live.</p>
-        </div>
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}>
+          <h1 className="text-3xl font-extrabold text-text-primary font-display">Markets</h1>
+          <p className="text-xs text-text-secondary mt-1">Search, bookmark, and trade US Stocks live.</p>
+        </motion.div>
 
         {/* Filter Utilities Bar */}
         <div className="flex flex-col xl:flex-row gap-6 justify-between items-stretch xl:items-center">
           {/* Movers category tabs */}
-          <div className="flex bg-slate-900 border border-slate-800 p-1.5 rounded-2xl text-xs font-bold text-slate-400 max-w-md shrink-0">
-            {[
+          <TabSwitch
+            layoutId="market-filter-pill"
+            className="max-w-md shrink-0"
+            active={activeFilter}
+            onChange={setActiveFilter}
+            tabs={[
               { id: 'ALL', label: 'All Stocks', icon: Activity },
               { id: 'GAINERS', label: 'Top Gainers', icon: TrendingUp },
               { id: 'LOSERS', label: 'Top Losers', icon: TrendingDown },
-              { id: 'TRENDING', label: 'High Volume', icon: Sparkles }
-            ].map(tab => {
-              const Icon = tab.icon;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveFilter(tab.id)}
-                  className={`flex items-center space-x-1.5 px-4 py-2.5 rounded-xl transition-all ${
-                    activeFilter === tab.id
-                      ? 'bg-slate-800 text-slate-100 border border-slate-700/80 shadow-md'
-                      : 'hover:text-slate-200'
-                  }`}
-                >
-                  <Icon className="w-3.5 h-3.5" />
-                  <span>{tab.label}</span>
-                </button>
-              );
-            })}
-          </div>
+              { id: 'TRENDING', label: 'High Volume', icon: Flame }
+            ]}
+          />
 
           {/* Search Input */}
           <div className="relative max-w-sm flex-1">
@@ -194,9 +181,9 @@ const Market = () => {
               placeholder="Search by symbol or name..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-11 pl-11 pr-4 bg-slate-900 border border-slate-850 rounded-2xl text-xs font-semibold focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-200"
+              className="w-full h-11 pl-11 pr-4 bg-surface-sunken border border-border-default rounded-2xl text-xs font-semibold focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 text-text-primary"
             />
-            <Search className="absolute left-4 top-3.5 w-4 h-4 text-slate-500" />
+            <Search className="absolute left-4 top-3.5 w-4 h-4 text-text-muted" />
           </div>
         </div>
 
@@ -208,8 +195,8 @@ const Market = () => {
               onClick={() => setActiveSector(sec)}
               className={`px-4 py-2 text-xxs font-extrabold uppercase tracking-widest rounded-full transition-all shrink-0 border ${
                 activeSector === sec
-                  ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-600/10'
-                  : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+                  ? 'bg-brand-600 border-brand-500 text-white shadow-lg shadow-brand-600/10'
+                  : 'bg-surface-sunken border-border-subtle text-text-muted hover:text-text-primary hover:border-border-default'
               }`}
             >
               {sec}
@@ -222,11 +209,11 @@ const Market = () => {
           <LoadingSkeleton.Table rows={8} cols={6} />
         ) : paginatedStocks.length > 0 ? (
           <div className="space-y-6">
-            <GlassCard className="p-0 overflow-hidden border-slate-800" hover={false}>
+            <GlassCard className="p-0 overflow-hidden border-border-subtle" hover={false}>
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="border-b border-slate-850 text-xxs font-bold uppercase tracking-wider text-slate-500 bg-slate-900/35">
+                    <tr className="border-b border-border-subtle text-xxs font-bold uppercase tracking-wider text-text-muted bg-surface-sunken">
                       <th className="px-6 py-4">Symbol</th>
                       <th className="px-6 py-4">Company</th>
                       <th className="px-6 py-4 text-right">Price</th>
@@ -236,43 +223,43 @@ const Market = () => {
                       <th className="px-6 py-4 text-center">Action</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-850 text-sm font-semibold">
+                  <tbody className="divide-y divide-border-subtle text-sm font-semibold">
                     {paginatedStocks.map((stock) => {
                       const inWatchlist = watchlistSymbols.includes(stock.symbol);
                       return (
-                        <tr 
+                        <tr
                           key={stock.symbol}
-                          className="hover:bg-slate-900/25 transition-colors group"
+                          className="hover:bg-surface-sunken/60 transition-colors group"
                         >
                           {/* Symbol */}
                           <td className="px-6 py-4">
-                            <Link to={`/stocks/${stock.symbol}`} className="font-extrabold text-indigo-400 hover:text-indigo-300">
+                            <Link to={`/stocks/${stock.symbol}`} className="font-extrabold text-brand-500 hover:text-brand-400">
                               {stock.symbol}
                             </Link>
                           </td>
                           {/* Company name */}
                           <td className="px-6 py-4">
                             <div>
-                              <span className="text-slate-200 block text-xs truncate max-w-40 md:max-w-64">{stock.name}</span>
-                              <span className="text-xxs text-slate-500 font-medium bg-slate-950 px-2 py-0.5 rounded mt-0.5 inline-block">
+                              <span className="text-text-primary block text-xs truncate max-w-40 md:max-w-64">{stock.name}</span>
+                              <span className="text-xxs text-text-muted font-medium bg-surface-sunken px-2 py-0.5 rounded mt-0.5 inline-block">
                                 {stock.sector}
                               </span>
                             </div>
                           </td>
                           {/* Price */}
-                          <td className="px-6 py-4 text-right font-display text-slate-200 font-bold">
+                          <td className="px-6 py-4 text-right font-display text-text-primary font-bold">
                             ${stock.price.toFixed(2)}
                           </td>
                           {/* Change */}
                           <td className="px-6 py-4 text-right">
                             <span className={`inline-flex items-center text-xs font-bold ${
-                              stock.changePercent >= 0 ? 'text-emerald-400' : 'text-rose-400'
+                              stock.changePercent >= 0 ? 'text-success-500' : 'text-danger-500'
                             }`}>
                               {stock.changePercent >= 0 ? '+' : ''}{stock.changePercent.toFixed(2)}%
                             </span>
                           </td>
                           {/* Volume */}
-                          <td className="px-6 py-4 text-right text-xs text-slate-400">
+                          <td className="px-6 py-4 text-right text-xs text-text-secondary">
                             {stock.volume.toLocaleString()}
                           </td>
                           {/* Watchlist toggle */}
@@ -280,9 +267,9 @@ const Market = () => {
                             <button
                               onClick={(e) => handleWatchlistToggle(stock.symbol, stock.name, e)}
                               className={`p-2 rounded-xl transition-all border ${
-                                inWatchlist 
-                                  ? 'bg-amber-950/40 border-amber-500/25 text-amber-400' 
-                                  : 'bg-slate-900 border-slate-800 text-slate-500 hover:text-slate-300'
+                                inWatchlist
+                                  ? 'bg-amber-950/40 border-amber-500/25 text-amber-400'
+                                  : 'bg-surface-raised border-border-subtle text-text-muted hover:text-text-secondary'
                               }`}
                             >
                               <Star className={`w-4 h-4 ${inWatchlist ? 'fill-amber-400' : ''}`} />
@@ -292,7 +279,7 @@ const Market = () => {
                           <td className="px-6 py-4 text-center">
                             <Link
                               to={`/stocks/${stock.symbol}`}
-                              className="inline-flex items-center px-4 py-2 bg-indigo-650 hover:bg-indigo-600 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-indigo-900/10"
+                              className="rgb-glow inline-flex items-center px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-brand-900/10"
                             >
                               Trade
                               <ArrowUpRight className="w-3.5 h-3.5 ml-1" />
@@ -308,25 +295,25 @@ const Market = () => {
 
             {/* Pagination Controls */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-between border-t border-slate-900 pt-6">
-                <span className="text-xs text-slate-500">
+              <div className="flex items-center justify-between border-t border-border-subtle pt-6">
+                <span className="text-xs text-text-muted">
                   Showing {startIndex + 1} - {Math.min(startIndex + itemsPerPage, filteredStocks.length)} of {filteredStocks.length} Stocks
                 </span>
                 <div className="flex items-center space-x-1">
                   <button
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className="p-2 border border-slate-850 hover:bg-slate-900 rounded-xl text-slate-400 disabled:opacity-40 disabled:hover:bg-transparent transition-colors"
+                    className="p-2 border border-border-subtle hover:bg-surface-sunken rounded-xl text-text-secondary disabled:opacity-40 disabled:hover:bg-transparent transition-colors"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
-                  <span className="text-xs text-slate-400 font-bold px-4">
+                  <span className="text-xs text-text-secondary font-bold px-4">
                     Page {currentPage} of {totalPages}
                   </span>
                   <button
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
-                    className="p-2 border border-slate-850 hover:bg-slate-900 rounded-xl text-slate-400 disabled:opacity-40 disabled:hover:bg-transparent transition-colors"
+                    className="p-2 border border-border-subtle hover:bg-surface-sunken rounded-xl text-text-secondary disabled:opacity-40 disabled:hover:bg-transparent transition-colors"
                   >
                     <ChevronRight className="w-4 h-4" />
                   </button>
@@ -336,9 +323,9 @@ const Market = () => {
           </div>
         ) : (
           <GlassCard className="text-center py-20" hover={false}>
-            <Search className="w-12 h-12 mx-auto text-slate-700 mb-4" />
-            <h3 className="text-lg font-bold text-slate-300 font-display">No Stocks Found</h3>
-            <p className="text-xs text-slate-500 max-w-sm mx-auto mt-2 leading-relaxed">No stocks matched your current search parameters. Try adjusting your category filters or search text.</p>
+            <Search className="w-12 h-12 mx-auto text-text-muted mb-4" />
+            <h3 className="text-lg font-bold text-text-primary font-display">No Stocks Found</h3>
+            <p className="text-xs text-text-secondary max-w-sm mx-auto mt-2 leading-relaxed">No stocks matched your current search parameters. Try adjusting your category filters or search text.</p>
           </GlassCard>
         )}
       </div>

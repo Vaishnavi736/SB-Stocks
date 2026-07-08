@@ -2,22 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import { 
-  ArrowLeft, 
-  Star, 
-  Sparkles, 
-  Globe, 
-  DollarSign, 
-  Calendar,
+import {
+  ArrowLeft,
+  Star,
+  Globe,
   Building,
   Scale
 } from 'lucide-react';
+import { motion } from 'framer-motion';
 import DashboardLayout from '../layout/DashboardLayout';
 import GlassCard from '../components/GlassCard';
 import StockChart from '../components/StockChart';
 import TradingPanel from '../components/TradingPanel';
 import NewsFeed from '../components/NewsFeed';
 import LoadingSkeleton from '../components/LoadingSkeleton';
+import Badge from '../components/Badge';
+import AnimatedCounter from '../components/AnimatedCounter';
 
 const StockDetails = () => {
   const { symbol } = useParams();
@@ -125,7 +125,7 @@ const StockDetails = () => {
     return (
       <DashboardLayout>
         <div className="space-y-8">
-          <div className="h-20 bg-slate-900 border border-slate-800 animate-pulse rounded-3xl"></div>
+          <div className="h-20 bg-surface-raised border border-border-subtle animate-shimmer rounded-3xl"></div>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-8">
               <LoadingSkeleton.Card height="h-[360px]" />
@@ -160,55 +160,60 @@ const StockDetails = () => {
     <DashboardLayout>
       <div className="space-y-8">
         {/* Back Link & Ticker Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          className="flex flex-col md:flex-row md:items-center justify-between gap-6"
+        >
           <div className="flex items-center space-x-4">
-            <Link 
-              to="/market" 
-              className="p-2 border border-slate-850 hover:bg-slate-900 rounded-xl text-slate-400 hover:text-slate-100 transition-all"
+            <Link
+              to="/market"
+              className="p-2 border border-border-subtle hover:bg-surface-sunken rounded-xl text-text-secondary hover:text-text-primary transition-all"
             >
               <ArrowLeft className="w-5 h-5" />
             </Link>
-            
+
             {profile?.logo && (
-              <img src={profile.logo} alt="Logo" className="w-12 h-12 rounded-2xl bg-slate-900 border border-slate-800 p-1" />
+              <img src={profile.logo} alt="Logo" className="w-12 h-12 rounded-2xl bg-surface-raised border border-border-subtle p-1" />
             )}
 
             <div>
               <div className="flex items-center space-x-2">
-                <h1 className="text-3xl font-extrabold text-slate-100 font-display leading-none">{symbol.toUpperCase()}</h1>
+                <h1 className="text-3xl font-extrabold text-text-primary font-display leading-none">{symbol.toUpperCase()}</h1>
                 <button
                   onClick={handleWatchlistToggle}
                   className={`p-2 rounded-xl transition-all border ${
-                    inWatchlist 
-                      ? 'bg-amber-950/40 border-amber-500/25 text-amber-400' 
-                      : 'bg-slate-900 border-slate-800 text-slate-500 hover:text-slate-200'
+                    inWatchlist
+                      ? 'bg-amber-950/40 border-amber-500/25 text-amber-400'
+                      : 'bg-surface-raised border-border-subtle text-text-muted hover:text-text-secondary'
                   }`}
                   title="Toggle Watchlist"
                 >
                   <Star className={`w-4 h-4 ${inWatchlist ? 'fill-amber-400' : ''}`} />
                 </button>
               </div>
-              <p className="text-xs text-slate-400 mt-1 font-semibold">{profile?.name || 'Company Profile'}</p>
+              <p className="text-xs text-text-secondary mt-1 font-semibold">{profile?.name || 'Company Profile'}</p>
             </div>
           </div>
 
           {/* Pricing Info */}
           {quote && (
             <div className="text-left md:text-right">
-              <span className="text-3xl font-extrabold font-display text-slate-100 leading-none">
-                ${quote.c.toFixed(2)}
+              <span className="text-3xl font-extrabold font-display text-text-primary leading-none tabular-nums">
+                <AnimatedCounter value={quote.c} prefix="$" decimals={2} />
               </span>
               <div className="flex items-center md:justify-end space-x-2 mt-1">
-                <span className={`text-xs font-bold ${isPositive ? 'text-emerald-400' : 'text-rose-400'}`}>
-                  {isPositive ? '+' : ''}{quote.dp.toFixed(2)}%
+                <span className={`text-xs font-bold tabular-nums ${isPositive ? 'text-success-500' : 'text-danger-500'}`}>
+                  {isPositive ? '+' : ''}<AnimatedCounter value={quote.dp} decimals={2} suffix="%" />
                 </span>
-                <span className="text-xxs text-slate-500 font-medium">
+                <span className="text-xxs text-text-muted font-medium tabular-nums">
                   ({isPositive ? '+' : ''}${quote.d.toFixed(2)} Today)
                 </span>
               </div>
             </div>
           )}
-        </div>
+        </motion.div>
 
         {/* Chart View and Buying Panel Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
@@ -216,14 +221,14 @@ const StockDetails = () => {
           <div className="lg:col-span-2 space-y-8">
             <GlassCard className="flex flex-col justify-between" hover={false}>
               <div>
-                <h2 className="text-lg font-bold text-slate-100 font-display">Historical Valuation</h2>
-                <p className="text-xxs font-semibold text-slate-500 uppercase tracking-wider mt-1">Timeline historical performance</p>
+                <h2 className="text-lg font-bold text-text-primary font-display">Historical Valuation</h2>
+                <p className="text-xxs font-semibold text-text-muted uppercase tracking-wider mt-1">Timeline historical performance</p>
               </div>
 
               <div className="mt-8">
                 {chartLoading ? (
-                  <div className="h-64 flex items-center justify-center bg-slate-905/30 rounded-2xl">
-                    <Sparkles className="w-8 h-8 text-indigo-500 animate-spin" />
+                  <div className="h-64 flex items-center justify-center bg-surface-sunken rounded-2xl">
+                    <div className="w-6 h-6 rounded-full border-2 border-border-default border-t-brand-500 animate-spin" />
                   </div>
                 ) : (
                   <StockChart 
@@ -239,12 +244,12 @@ const StockDetails = () => {
 
             {/* Key Statistics Grid */}
             <GlassCard hover={false}>
-              <h2 className="text-lg font-bold text-slate-100 font-display border-b border-slate-800 pb-3">Key Statistics</h2>
+              <h2 className="text-lg font-bold text-text-primary font-display border-b border-border-subtle pb-3">Key Statistics</h2>
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-6 mt-6">
                 {keyStats.map((stat) => (
                   <div key={stat.label}>
-                    <p className="text-xxs font-semibold uppercase tracking-wider text-slate-500">{stat.label}</p>
-                    <p className="text-sm font-extrabold text-slate-200 mt-1 font-display">{stat.value}</p>
+                    <p className="text-xxs font-semibold uppercase tracking-wider text-text-muted">{stat.label}</p>
+                    <p className="text-sm font-extrabold text-text-primary mt-1 font-display">{stat.value}</p>
                   </div>
                 ))}
               </div>
@@ -253,23 +258,23 @@ const StockDetails = () => {
             {/* Company Bio */}
             {profile?.description && (
               <GlassCard hover={false}>
-                <h2 className="text-lg font-bold text-slate-100 font-display border-b border-slate-800 pb-3">About Company</h2>
-                <p className="text-xs text-slate-400 leading-relaxed font-medium mt-4">{profile.description}</p>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6 pt-6 border-t border-slate-805 text-xs font-semibold">
+                <h2 className="text-lg font-bold text-text-primary font-display border-b border-border-subtle pb-3">About Company</h2>
+                <p className="text-xs text-text-secondary leading-relaxed font-medium mt-4">{profile.description}</p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6 pt-6 border-t border-border-subtle text-xs font-semibold">
                   <div className="flex items-center space-x-2">
-                    <Building className="w-4 h-4 text-slate-500" />
-                    <span className="text-slate-400">HQ:</span>
-                    <span className="text-slate-200">{profile.headquarters || 'USA'}</span>
+                    <Building className="w-4 h-4 text-text-muted" />
+                    <span className="text-text-secondary">HQ:</span>
+                    <span className="text-text-primary">{profile.headquarters || 'USA'}</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Scale className="w-4 h-4 text-slate-500" />
-                    <span className="text-slate-400">CEO:</span>
-                    <span className="text-slate-200">{profile.ceo || 'N/A'}</span>
+                    <Scale className="w-4 h-4 text-text-muted" />
+                    <span className="text-text-secondary">CEO:</span>
+                    <span className="text-text-primary">{profile.ceo || 'N/A'}</span>
                   </div>
                   {profile.weburl && (
                     <div className="flex items-center space-x-2">
-                      <Globe className="w-4 h-4 text-slate-500" />
-                      <a href={profile.weburl} target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300">
+                      <Globe className="w-4 h-4 text-text-muted" />
+                      <a href={profile.weburl} target="_blank" rel="noopener noreferrer" className="text-brand-500 hover:text-brand-400">
                         Visit Website
                       </a>
                     </div>
@@ -293,7 +298,7 @@ const StockDetails = () => {
 
             {/* News feed column */}
             <div className="space-y-4">
-              <h3 className="text-base font-bold text-slate-300 font-display">News & Updates</h3>
+              <h3 className="text-base font-bold text-text-secondary font-display">News & Updates</h3>
               <NewsFeed news={news} />
             </div>
           </div>

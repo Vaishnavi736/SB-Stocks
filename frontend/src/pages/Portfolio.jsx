@@ -9,16 +9,15 @@ import {
   Tooltip, 
   Legend 
 } from 'recharts';
-import { 
-  Briefcase, 
-  TrendingUp, 
-  DollarSign, 
-  Activity, 
-  Percent, 
-  ArrowUpRight, 
-  Plus,
-  Sparkles
+import {
+  Briefcase,
+  DollarSign,
+  Activity,
+  Percent,
+  ArrowUpRight,
+  Plus
 } from 'lucide-react';
+import { motion } from 'framer-motion';
 import DashboardLayout from '../layout/DashboardLayout';
 import GlassCard from '../components/GlassCard';
 import StatCard from '../components/StatCard';
@@ -30,10 +29,10 @@ const CustomPieTooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {
     const data = payload[0];
     return (
-      <div className="bg-slate-900 border border-slate-800 p-3 rounded-2xl shadow-xl backdrop-blur-md text-xs font-semibold">
-        <p className="text-slate-200">{data.name}</p>
-        <p className="text-indigo-400 mt-1">Value: ${data.value.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
-        <p className="text-slate-500 font-medium">Allocation: {data.payload.percent.toFixed(2)}%</p>
+      <div className="bg-surface-raised border border-border-subtle p-3 rounded-2xl shadow-xl backdrop-blur-md text-xs font-semibold">
+        <p className="text-text-primary">{data.name}</p>
+        <p className="text-brand-500 mt-1">Value: ${data.value.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+        <p className="text-text-muted font-medium">Allocation: {data.payload.percent.toFixed(2)}%</p>
       </div>
     );
   }
@@ -117,16 +116,17 @@ const Portfolio = () => {
     <DashboardLayout>
       <div className="space-y-8">
         {/* Header Title */}
-        <div>
-          <h1 className="text-3xl font-extrabold text-slate-100 font-display">Portfolio</h1>
-          <p className="text-xs text-slate-400 mt-1">Valuations, sector allocations, and current holdings.</p>
-        </div>
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}>
+          <h1 className="text-3xl font-extrabold text-text-primary font-display">Portfolio</h1>
+          <p className="text-xs text-text-secondary mt-1">Valuations, sector allocations, and current holdings.</p>
+        </motion.div>
 
         {/* Statistic Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatCard
             title="Portfolio Value"
-            value={`$${totalValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
+            value={totalValue}
+            prefix="$"
             change={totalPL}
             changePercent={totalPLPct}
             icon={Briefcase}
@@ -134,19 +134,22 @@ const Portfolio = () => {
           />
           <StatCard
             title="Virtual Balance"
-            value={`$${cash.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
+            value={cash}
+            prefix="$"
             icon={DollarSign}
             description="Simulated cash balance"
           />
           <StatCard
             title="Total Cost Basis"
-            value={`$${investment.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
+            value={investment}
+            prefix="$"
             icon={Percent}
             description="Total Virtual Invested Amount"
           />
           <StatCard
             title="Live Positions Value"
-            value={`$${currentHoldingsValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
+            value={currentHoldingsValue}
+            prefix="$"
             icon={Activity}
             description="Total market value of assets"
           />
@@ -156,17 +159,17 @@ const Portfolio = () => {
         {holdings.length > 0 ? (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Holdings Table Card */}
-            <GlassCard className="lg:col-span-2 overflow-hidden p-0 border-slate-800" hover={false}>
-              <div className="p-6 border-b border-slate-850 flex items-center justify-between">
-                <h2 className="text-lg font-bold text-slate-100 font-display">Holdings Summary</h2>
-                <span className="text-xxs font-bold text-slate-500 uppercase bg-slate-900 border border-slate-800 px-3 py-1 rounded-full">
+            <GlassCard className="lg:col-span-2 overflow-hidden p-0 border-border-subtle" hover={false}>
+              <div className="p-6 border-b border-border-subtle flex items-center justify-between">
+                <h2 className="text-lg font-bold text-text-primary font-display">Holdings Summary</h2>
+                <span className="text-xxs font-bold text-text-muted uppercase bg-surface-raised border border-border-subtle px-3 py-1 rounded-full">
                   {holdings.length} Positions Active
                 </span>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="border-b border-slate-850 text-xxs font-bold uppercase tracking-wider text-slate-500 bg-slate-900/35">
+                    <tr className="border-b border-border-subtle text-xxs font-bold uppercase tracking-wider text-text-muted bg-surface-sunken">
                       <th className="px-6 py-4">Symbol</th>
                       <th className="px-6 py-4 text-right">Shares</th>
                       <th className="px-6 py-4 text-right">Avg Cost</th>
@@ -176,35 +179,35 @@ const Portfolio = () => {
                       <th className="px-6 py-4 text-center">Trade</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-850 text-sm font-semibold">
+                  <tbody className="divide-y divide-border-subtle text-sm font-semibold">
                     {holdings.map((h) => {
                       const isHoldingPositive = h.profitLoss >= 0;
                       return (
-                        <tr key={h._id} className="hover:bg-slate-905/30 transition-colors">
+                        <tr key={h._id} className="hover:bg-surface-sunken/60 transition-colors">
                           <td className="px-6 py-4">
-                            <Link to={`/stocks/${h.stockSymbol}`} className="font-extrabold text-indigo-400 hover:text-indigo-300">
+                            <Link to={`/stocks/${h.stockSymbol}`} className="font-extrabold text-brand-500 hover:text-brand-400">
                               {h.stockSymbol}
                             </Link>
-                            <span className="block text-xxs text-slate-500 font-medium max-w-28 truncate">{h.companyName}</span>
+                            <span className="block text-xxs text-text-muted font-medium max-w-28 truncate">{h.companyName}</span>
                           </td>
-                          <td className="px-6 py-4 text-right text-slate-300 font-mono text-xs">{h.quantity}</td>
-                          <td className="px-6 py-4 text-right text-slate-400 font-mono text-xs">${h.averageBuyPrice.toFixed(2)}</td>
-                          <td className="px-6 py-4 text-right text-slate-200 font-mono text-xs">${h.currentPrice.toFixed(2)}</td>
-                          <td className="px-6 py-4 text-right text-slate-100 font-display font-bold">${h.currentValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                          <td className="px-6 py-4 text-right text-text-secondary font-mono text-xs">{h.quantity}</td>
+                          <td className="px-6 py-4 text-right text-text-secondary font-mono text-xs">${h.averageBuyPrice.toFixed(2)}</td>
+                          <td className="px-6 py-4 text-right text-text-primary font-mono text-xs">${h.currentPrice.toFixed(2)}</td>
+                          <td className="px-6 py-4 text-right text-text-primary font-display font-bold">${h.currentValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                           <td className="px-6 py-4 text-right">
                             <div className="flex flex-col text-right">
-                              <span className={`text-xs font-bold ${isHoldingPositive ? 'text-emerald-400' : 'text-rose-400'}`}>
+                              <span className={`text-xs font-bold ${isHoldingPositive ? 'text-success-500' : 'text-danger-500'}`}>
                                 {isHoldingPositive ? '+' : ''}${h.profitLoss.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                               </span>
-                              <span className={`text-xxs font-semibold mt-0.5 ${isHoldingPositive ? 'text-emerald-500/80' : 'text-rose-500/80'}`}>
+                              <span className={`text-xxs font-semibold mt-0.5 ${isHoldingPositive ? 'text-success-500/80' : 'text-danger-500/80'}`}>
                                 {isHoldingPositive ? '+' : ''}{h.profitLossPercentage.toFixed(2)}%
                               </span>
                             </div>
                           </td>
                           <td className="px-6 py-4 text-center">
-                            <Link 
+                            <Link
                               to={`/stocks/${h.stockSymbol}`}
-                              className="inline-flex p-2 bg-slate-900 border border-slate-800 hover:bg-indigo-650 hover:text-white rounded-xl text-slate-400 transition-all"
+                              className="inline-flex p-2 bg-surface-raised border border-border-subtle hover:bg-brand-600 hover:text-white rounded-xl text-text-secondary transition-all"
                             >
                               <ArrowUpRight className="w-4 h-4" />
                             </Link>
@@ -219,7 +222,7 @@ const Portfolio = () => {
 
             {/* Asset Allocation Chart Card */}
             <GlassCard className="flex flex-col" hover={false}>
-              <h2 className="text-lg font-bold text-slate-100 font-display border-b border-slate-800 pb-3 mb-6">Asset Allocation</h2>
+              <h2 className="text-lg font-bold text-text-primary font-display border-b border-border-subtle pb-3 mb-6">Asset Allocation</h2>
               <div className="h-64 relative flex items-center justify-center flex-1">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
@@ -242,7 +245,7 @@ const Portfolio = () => {
                       height={40} 
                       iconSize={10} 
                       iconType="circle"
-                      formatter={(val) => <span className="text-slate-400 text-xs font-bold ml-1.5">{val}</span>}
+                      formatter={(val) => <span className="text-text-secondary text-xs font-bold ml-1.5">{val}</span>}
                     />
                   </PieChart>
                 </ResponsiveContainer>
@@ -251,10 +254,10 @@ const Portfolio = () => {
           </div>
         ) : (
           <GlassCard className="text-center py-24" hover={false}>
-            <Briefcase className="w-12 h-12 mx-auto text-slate-700 mb-4" />
-            <h3 className="text-lg font-bold text-slate-300 font-display">No Holdings Active</h3>
-            <p className="text-xs text-slate-500 max-w-sm mx-auto mt-2 leading-relaxed">You haven't bought any stocks yet. Head over to the Market page and execute your first paper trade!</p>
-            <Link to="/market" className="inline-flex items-center space-x-1 px-5 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-2xl shadow-lg shadow-indigo-600/10 mt-6 transition-all">
+            <Briefcase className="w-12 h-12 mx-auto text-text-muted mb-4" />
+            <h3 className="text-lg font-bold text-text-primary font-display">No Holdings Active</h3>
+            <p className="text-xs text-text-secondary max-w-sm mx-auto mt-2 leading-relaxed">You haven't bought any stocks yet. Head over to the Market page and execute your first paper trade!</p>
+            <Link to="/market" className="rgb-glow inline-flex items-center space-x-1 px-5 py-3 bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs rounded-2xl shadow-lg shadow-brand-600/10 mt-6 transition-all">
               <Plus className="w-4 h-4" />
               <span>Browse Market</span>
             </Link>

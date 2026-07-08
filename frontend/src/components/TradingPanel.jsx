@@ -66,13 +66,13 @@ const TradingPanel = ({ stockSymbol, companyName, livePrice, ownedQuantity = 0, 
   return (
     <GlassCard className="w-full shadow-xl" hover={false}>
       {/* Tabs BUY/SELL */}
-      <div className="flex border-b border-slate-800 pb-4 mb-5">
+      <div className="flex border-b border-border-subtle pb-4 mb-5">
         <button
           onClick={() => { setTab('BUY'); setQuantity(''); }}
           className={`flex-1 py-2.5 text-center text-sm font-bold rounded-xl transition-all ${
             tab === 'BUY'
-              ? 'bg-emerald-950/50 text-emerald-400 border border-emerald-500/30'
-              : 'text-slate-500 hover:text-slate-300'
+              ? 'bg-success-500/10 text-success-500 border border-success-500/30'
+              : 'text-text-muted hover:text-text-secondary'
           }`}
         >
           Buy {stockSymbol}
@@ -81,8 +81,8 @@ const TradingPanel = ({ stockSymbol, companyName, livePrice, ownedQuantity = 0, 
           onClick={() => { setTab('SELL'); setQuantity(''); }}
           className={`flex-1 py-2.5 text-center text-sm font-bold rounded-xl transition-all ${
             tab === 'SELL'
-              ? 'bg-rose-950/50 text-rose-400 border border-rose-500/30'
-              : 'text-slate-500 hover:text-slate-300'
+              ? 'bg-danger-500/10 text-danger-500 border border-danger-500/30'
+              : 'text-text-muted hover:text-text-secondary'
           }`}
         >
           Sell {stockSymbol}
@@ -92,8 +92,8 @@ const TradingPanel = ({ stockSymbol, companyName, livePrice, ownedQuantity = 0, 
       <form onSubmit={handleTradeSubmit} className="space-y-4">
         {/* Market Price Display */}
         <div className="flex justify-between items-center text-sm">
-          <span className="text-slate-400 font-medium">Market Price</span>
-          <span className="font-bold text-slate-100 font-display">
+          <span className="text-text-secondary font-medium">Market Price</span>
+          <span className="font-bold text-text-primary font-display">
             ${livePrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </span>
         </div>
@@ -101,14 +101,14 @@ const TradingPanel = ({ stockSymbol, companyName, livePrice, ownedQuantity = 0, 
         {/* Owned Quantity Display */}
         {ownedQuantity > 0 && (
           <div className="flex justify-between items-center text-sm">
-            <span className="text-slate-400 font-medium">Owned Shares</span>
-            <span className="font-bold text-indigo-400">{ownedQuantity}</span>
+            <span className="text-text-secondary font-medium">Owned Shares</span>
+            <span className="font-bold text-brand-500">{ownedQuantity}</span>
           </div>
         )}
 
         {/* Quantity Input Field */}
         <div>
-          <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Quantity</label>
+          <label className="block text-xs font-semibold text-text-secondary uppercase tracking-wider mb-2">Quantity</label>
           <input
             type="number"
             placeholder="0"
@@ -116,17 +116,17 @@ const TradingPanel = ({ stockSymbol, companyName, livePrice, ownedQuantity = 0, 
             step="any"
             value={quantity}
             onChange={(e) => setQuantity(e.target.value)}
-            className="w-full h-11 px-4 text-slate-100 bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 font-semibold"
+            className="w-full h-11 px-4 text-text-primary bg-surface-sunken border border-border-default rounded-xl focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/40 font-semibold"
             required
           />
         </div>
 
-        <div className="w-full border-t border-slate-800/80 my-3"></div>
+        <div className="w-full border-t border-border-subtle my-3"></div>
 
         {/* Totals */}
         <div className="flex justify-between items-center text-sm">
-          <span className="text-slate-400 font-medium">Estimated {tab === 'BUY' ? 'Cost' : 'Credit'}</span>
-          <span className="font-extrabold text-slate-100 font-display text-lg">
+          <span className="text-text-secondary font-medium">Estimated {tab === 'BUY' ? 'Cost' : 'Credit'}</span>
+          <span className="font-extrabold text-text-primary font-display text-lg">
             ${totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </span>
         </div>
@@ -134,8 +134,8 @@ const TradingPanel = ({ stockSymbol, companyName, livePrice, ownedQuantity = 0, 
         {/* User Balance warning */}
         {tab === 'BUY' && (
           <div className="flex justify-between items-center text-xs">
-            <span className="text-slate-500">Buying Power:</span>
-            <span className={`font-semibold ${hasFunds ? 'text-slate-300' : 'text-rose-400'}`}>
+            <span className="text-text-muted">Buying Power:</span>
+            <span className={`font-semibold ${hasFunds ? 'text-text-secondary' : 'text-danger-500'}`}>
               ${user?.virtualBalance.toLocaleString(undefined, { minimumFractionDigits: 2 })}
             </span>
           </div>
@@ -145,10 +145,10 @@ const TradingPanel = ({ stockSymbol, companyName, livePrice, ownedQuantity = 0, 
         <button
           type="submit"
           disabled={loading || !isInputValid || (tab === 'BUY' && !hasFunds) || (tab === 'SELL' && !hasShares)}
-          className={`w-full h-12 text-sm font-bold rounded-xl shadow-lg transition-all ${
+          className={`rgb-glow w-full h-12 text-sm font-bold rounded-xl shadow-lg transition-all ${
             tab === 'BUY'
-              ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/10 disabled:bg-slate-800 disabled:text-slate-500 disabled:shadow-none'
-              : 'bg-rose-600 hover:bg-rose-500 text-white shadow-rose-600/10 disabled:bg-slate-800 disabled:text-slate-500 disabled:shadow-none'
+              ? 'bg-success-600 hover:bg-success-500 text-white shadow-success-600/10 disabled:bg-surface-sunken disabled:text-text-muted disabled:shadow-none'
+              : 'bg-danger-600 hover:bg-danger-500 text-white shadow-danger-600/10 disabled:bg-surface-sunken disabled:text-text-muted disabled:shadow-none'
           }`}
         >
           {loading ? 'Executing trade...' : `${tab === 'BUY' ? 'Buy' : 'Sell'} Stock`}

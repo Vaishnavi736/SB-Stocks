@@ -3,13 +3,8 @@ import React, { createContext, useState, useEffect, useContext } from 'react';
 const ThemeContext = createContext(null);
 
 export const ThemeProvider = ({ children }) => {
-  // Check localstorage or system preference, default to dark
-  const [theme, setTheme] = useState(() => {
-    const saved = localStorage.getItem('theme');
-    if (saved) return saved;
-    const system = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-    return system;
-  });
+  // White/light is the product's default theme; only an explicit prior choice overrides it
+  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
 
   useEffect(() => {
     const root = window.document.documentElement;

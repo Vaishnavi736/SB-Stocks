@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import { 
-  Users, 
-  History, 
-  Briefcase, 
-  DollarSign, 
-  Trash2, 
-  Edit3, 
-  ShieldCheck, 
+import { motion } from 'framer-motion';
+import {
+  Users,
+  History,
+  Briefcase,
+  DollarSign,
+  Trash2,
+  Edit3,
+  ShieldCheck,
   X,
   Database
 } from 'lucide-react';
@@ -16,6 +17,7 @@ import DashboardLayout from '../layout/DashboardLayout';
 import GlassCard from '../components/GlassCard';
 import StatCard from '../components/StatCard';
 import LoadingSkeleton from '../components/LoadingSkeleton';
+import Badge from '../components/Badge';
 
 const Admin = () => {
   const [stats, setStats] = useState(null);
@@ -116,49 +118,59 @@ const Admin = () => {
     <DashboardLayout>
       <div className="space-y-8">
         {/* Title */}
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-2xl bg-indigo-950/50 border border-indigo-500/20 text-indigo-400 flex items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          className="flex items-center space-x-3"
+        >
+          <div className="w-10 h-10 rounded-2xl bg-brand-500/10 border border-brand-500/25 text-brand-500 flex items-center justify-center">
             <ShieldCheck className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-3xl font-extrabold text-slate-100 font-display">Admin Console</h1>
-            <p className="text-xs text-slate-400 mt-1">Global system logs, user balances, and cascade liquidations.</p>
+            <h1 className="text-3xl font-extrabold text-text-primary font-display">Admin Console</h1>
+            <p className="text-xs text-text-secondary mt-1">Global system logs, user balances, and cascade liquidations.</p>
           </div>
-        </div>
+        </motion.div>
 
         {/* Global Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatCard
             title="Total Platform Users"
             value={stats?.totalUsers || 0}
+            decimals={0}
             icon={Users}
             description="Active accounts registered"
           />
           <StatCard
             title="Total Operations Logged"
             value={stats?.totalTransactions || 0}
+            decimals={0}
             icon={History}
             description="Paper trades executed"
           />
           <StatCard
             title="Total Holdings Positions"
             value={stats?.totalHoldings || 0}
+            decimals={0}
             icon={Briefcase}
             description="Active DB portfolios entries"
           />
           <StatCard
             title="Avg User Net Worth"
-            value={`$${(stats?.averagePortfolioVal || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}`}
+            value={stats?.averagePortfolioVal || 0}
+            prefix="$"
+            decimals={0}
             icon={DollarSign}
             description="Mean user portfolio worth"
           />
         </div>
 
         {/* User Management Panel */}
-        <GlassCard className="p-0 overflow-hidden border-slate-800" hover={false}>
-          <div className="p-6 border-b border-slate-850 flex items-center justify-between">
-            <h2 className="text-lg font-bold text-slate-100 font-display">User Accounts</h2>
-            <span className="text-xxs font-bold text-slate-500 uppercase bg-slate-900 border border-slate-800 px-3 py-1 rounded-full">
+        <GlassCard className="p-0 overflow-hidden border-border-subtle" hover={false}>
+          <div className="p-6 border-b border-border-subtle flex items-center justify-between">
+            <h2 className="text-lg font-bold text-text-primary font-display">User Accounts</h2>
+            <span className="text-xxs font-bold text-text-muted uppercase bg-surface-sunken border border-border-subtle px-3 py-1 rounded-full">
               {users.length} registered
             </span>
           </div>
@@ -166,7 +178,7 @@ const Admin = () => {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-slate-850 text-xxs font-bold uppercase tracking-wider text-slate-500 bg-slate-900/35">
+                <tr className="bg-surface-sunken text-text-muted border-b border-border-subtle text-xxs font-bold uppercase tracking-wider">
                   <th className="px-6 py-4">Name / Avatar</th>
                   <th className="px-6 py-4">Email</th>
                   <th className="px-6 py-4 text-right">Cash Balance</th>
@@ -176,37 +188,37 @@ const Admin = () => {
                   <th className="px-6 py-4 text-center">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-850 text-sm font-semibold">
+              <tbody className="divide-y divide-border-subtle text-sm font-semibold">
                 {users.map((u) => (
-                  <tr key={u._id} className="hover:bg-slate-905/30 transition-colors">
+                  <tr key={u._id} className="hover:bg-surface-sunken/60 transition-colors">
                     {/* User profile */}
                     <td className="px-6 py-4">
                       <div className="flex items-center space-x-3">
-                        <img src={u.avatar} alt="avatar" className="w-7 h-7 rounded-full bg-slate-800 border border-slate-700" />
+                        <img src={u.avatar} alt="avatar" className="w-7 h-7 rounded-full bg-surface-sunken border border-border-default" />
                         <div>
-                          <span className="text-slate-200 block text-xs">{u.name}</span>
+                          <span className="text-text-primary block text-xs">{u.name}</span>
                           {u.isAdmin && (
-                            <span className="text-xxs font-bold text-indigo-400 uppercase tracking-widest leading-none mt-0.5 inline-block">Admin</span>
+                            <Badge tone="brand" className="mt-0.5 tracking-widest">Admin</Badge>
                           )}
                         </div>
                       </div>
                     </td>
                     {/* Email */}
-                    <td className="px-6 py-4 text-xs text-slate-400 font-medium">{u.email}</td>
+                    <td className="px-6 py-4 text-xs text-text-secondary font-medium">{u.email}</td>
                     {/* Cash */}
-                    <td className="px-6 py-4 text-right text-emerald-400 font-mono text-xs">
+                    <td className="px-6 py-4 text-right text-success-500 font-mono text-xs">
                       ${u.virtualBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </td>
                     {/* Networth */}
-                    <td className="px-6 py-4 text-right text-slate-100 font-display font-bold">
+                    <td className="px-6 py-4 text-right text-text-primary font-display font-bold">
                       ${u.totalPortfolioValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </td>
                     {/* Streak */}
-                    <td className="px-6 py-4 text-center text-xs text-slate-300">
+                    <td className="px-6 py-4 text-center text-xs text-text-secondary">
                       {u.loginStreak} Day{u.loginStreak > 1 ? 's' : ''}
                     </td>
                     {/* Created */}
-                    <td className="px-6 py-4 text-center text-xxs text-slate-500">
+                    <td className="px-6 py-4 text-center text-xxs text-text-muted">
                       {new Date(u.createdAt).toLocaleDateString()}
                     </td>
                     {/* Action buttons */}
@@ -215,7 +227,7 @@ const Admin = () => {
                         {/* Edit Balance */}
                         <button
                           onClick={() => { setSelectedUser(u); setNewBalance(u.virtualBalance.toString()); }}
-                          className="p-2 bg-slate-900 border border-slate-800 text-slate-400 hover:text-indigo-400 hover:border-indigo-500/25 rounded-xl transition-all"
+                          className="p-2 bg-surface-sunken border border-border-subtle text-text-secondary hover:text-brand-500 hover:border-brand-500/25 rounded-xl transition-all"
                           title="Adjust Balance"
                         >
                           <Edit3 className="w-4 h-4" />
@@ -223,7 +235,7 @@ const Admin = () => {
                         {/* Delete User */}
                         <button
                           onClick={() => handleDeleteUser(u._id, u.name)}
-                          className="p-2 bg-slate-900 border border-slate-800 text-slate-500 hover:text-rose-400 hover:border-rose-500/25 rounded-xl transition-all"
+                          className="p-2 bg-surface-sunken border border-border-subtle text-text-muted hover:text-danger-500 hover:bg-danger-500/10 hover:border-danger-500/25 rounded-xl transition-all"
                           title="Delete User"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -239,30 +251,30 @@ const Admin = () => {
 
         {/* Balance modifier overlay modal */}
         {selectedUser && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm">
-            <motion.div 
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-surface-canvas/70 backdrop-blur-sm">
+            <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl relative"
+              className="w-full max-w-sm bg-surface-raised border border-border-subtle rounded-3xl p-6 shadow-elevation-3 relative"
             >
               <button
                 onClick={() => setSelectedUser(null)}
-                className="absolute top-4 right-4 text-slate-500 hover:text-slate-300 transition-colors"
+                className="absolute top-4 right-4 text-text-muted hover:text-text-secondary transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
 
-              <h3 className="text-lg font-bold text-slate-200 font-display">Adjust cash balance</h3>
-              <p className="text-xxs text-slate-500 font-semibold mt-1">Configure buying power for user: {selectedUser.name}</p>
+              <h3 className="text-lg font-bold text-text-primary font-display">Adjust cash balance</h3>
+              <p className="text-xxs text-text-muted font-semibold mt-1">Configure buying power for user: {selectedUser.name}</p>
 
               <form onSubmit={handleUpdateBalance} className="mt-6 space-y-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">New Balance ($)</label>
+                  <label className="block text-xs font-semibold text-text-secondary uppercase tracking-wider mb-2">New Balance ($)</label>
                   <input
                     type="number"
                     value={newBalance}
                     onChange={(e) => setNewBalance(e.target.value)}
-                    className="w-full h-11 px-4 text-slate-100 bg-slate-950 border border-slate-800 rounded-xl focus:outline-none focus:border-indigo-500 font-semibold"
+                    className="w-full h-11 px-4 bg-surface-sunken border border-border-default rounded-xl text-text-primary focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/40 font-medium"
                     placeholder="Enter cash balance amount"
                     min="0"
                     required
@@ -272,7 +284,7 @@ const Admin = () => {
                 <button
                   type="submit"
                   disabled={updatingBalance}
-                  className="w-full h-11 bg-indigo-650 hover:bg-indigo-600 text-white font-bold text-xs rounded-xl shadow-lg transition-all"
+                  className="rgb-glow w-full h-11 bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all"
                 >
                   {updatingBalance ? 'Updating...' : 'Save Balance'}
                 </button>
