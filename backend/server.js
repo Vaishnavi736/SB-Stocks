@@ -14,19 +14,27 @@ const transactionRoutes = require('./routes/transactionRoutes');
 const watchlistRoutes = require('./routes/watchlistRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const cronRoutes = require('./routes/cronRoutes');
 
 // Initialize app
 const app = express();
 
 // Connect to MongoDB
-connectDB();
+connectDB().catch((error) => {
+  console.error(`Failed to establish initial MongoDB connection: ${error.message}`);
+});
+
+// Vercel (and most PaaS) sit behind a reverse proxy, so Express needs to
+// trust the X-Forwarded-For header to see the real client IP. Required for
+// express-rate-limit to work correctly on Vercel.
+app.set('trust proxy', 1);
 
 // Global Security and Utility Middlewares
 app.use(helmet({
   crossOriginResourcePolicy: false, // Allows cross-origin image loads
 }));
 app.use(cors({
-  origin: '*', // Customize this in production for frontend domain
+  origin: process.env.CLIENT_URL || '*', // Set CLIENT_URL to the deployed Netlify domain in production
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
@@ -54,6 +62,7 @@ app.use('/api/transactions', transactionRoutes);
 app.use('/api/watchlist', watchlistRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/cron', cronRoutes);
 
 // Root test route
 app.get('/', (req, res) => {
@@ -74,57 +83,30 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Background Job: Daily Portfolio Valuation History Updater
-const runPortfolioValuationHistoryJob = async () => {
-  try {
-    const User = require('./models/User');
-    const Holding = require('./models/Holding');
-    const PortfolioHistory = require('./models/PortfolioHistory');
-    const stockService = require('./services/stockService');
-
-    console.log('[Scheduler] Executing portfolio valuation history updates...');
-    const users = await User.find({});
-    
-    for (const user of users) {
-      const holdings = await Holding.find({ userId: user._id });
-      let holdingsTotalVal = 0;
-      
-      for (const h of holdings) {
-        try {
-          const quote = await stockService.getQuote(h.stockSymbol);
-          holdingsTotalVal += h.quantity * quote.c;
-        } catch (err) {
-          holdingsTotalVal += h.totalInvestment;
-        }
-      }
-      
-      const totalPortfolioValue = parseFloat((user.virtualBalance + holdingsTotalVal).toFixed(2));
-      user.totalPortfolioValue = totalPortfolioValue;
-      await user.save();
-
-      // Set date to midnight of today local time
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
-      await PortfolioHistory.findOneAndUpdate(
-        { userId: user._id, date: today },
-        { totalValue: totalPortfolioValue },
-        { upsert: true, new: true }
-      );
-    }
-    console.log('[Scheduler] Portfolio valuation history update successfully completed.');
-  } catch (error) {
+// Background Job: Daily Portfolio Valuation History Updater.
+// On Vercel, serverless functions can't run a persistent setInterval — the
+// daily job is instead triggered via the Vercel Cron Job configured in
+// vercel.json, which hits GET /api/cron/portfolio-valuation. This self-timer
+// fallback only runs when the app is kept alive as a long-running process
+// (e.g. local dev, Docker, Render, Railway).
+if (!process.env.VERCEL) {
+  const { runPortfolioValuationHistoryJob } = require('./services/portfolioValuationService');
+  const runJobSafely = () => runPortfolioValuationHistoryJob().catch((error) => {
     console.error(`[Scheduler Error] Failed to update histories: ${error.message}`);
-  }
-};
+  });
 
-// Run job on startup and set up interval for every 24 hours
-setTimeout(runPortfolioValuationHistoryJob, 5000); // 5s after server starts
-setInterval(runPortfolioValuationHistoryJob, 24 * 60 * 60 * 1000); // 24 hours
+  setTimeout(runJobSafely, 5000); // 5s after server starts
+  setInterval(runJobSafely, 24 * 60 * 60 * 1000); // 24 hours
+}
 
-const PORT = process.env.PORT || 5000;
-const server = app.listen(PORT, () => {
-  console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
-});
+// Vercel imports this module and calls the exported Express app directly as
+// the request handler, so app.listen() must only run for a real standalone
+// process (local dev, Docker, Render, Railway, etc.).
+if (require.main === module) {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+  });
+}
 
-module.exports = server;
+module.exports = app;

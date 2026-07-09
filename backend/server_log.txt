@@ -1,0 +1,4 @@
+Server running in development mode on port 5000
+[Scheduler] Executing portfolio valuation history updates...
+MongoDB Connected: ac-e5ig8ut-shard-00-00.elbn5yc.mongodb.net
+[Scheduler] Portfolio valuation history update successfully completed.
