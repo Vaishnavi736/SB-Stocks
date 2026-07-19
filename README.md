@@ -4,7 +4,7 @@ A full-stack **MERN** paper trading platform that allows users to practice stock
 
 ## 📁 Project Resources
 
-**Google Drive (Source Code, Documentation & Demo Videos):**
+**Google Drive Link:**
 https://drive.google.com/drive/folders/1gGwXeEzcwsTB1Hy3bT4OJxEyp2DPy_wc
 
 ## ✨ Features
